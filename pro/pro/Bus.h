@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include "forbus.h"
 #include "DB.h"
+
+//#define IS_EXISTS -1
+//#define noExists 1
+
+
 using namespace std;
 
 static int o = 0;
@@ -46,22 +51,14 @@ void Bus::Install() {
 		/*if (*bus[bus_order].bus_no != NULL ) {
 			cout << "\n이미 있는 버스 번호 입니다!\n";
 			continue;
-		}*/
-		//if (1) {
-		//	db.SelectData(dir, num_char);
-		//	continue;
-		//}
-		//else {
-		//	cout << "ok";
-		//}
+			*/
 
-		db.CheckBusExists(dir, num_char, bus_order);
-		if (sqlite3_table_column_metadata(DB, dir, tbl_bus, col_bus, 0, 0, 0, 0, 0) == bus_order) {
-			cout << "이미 있는 번호\n";
+		if (db.CheckBusExists(dir, num_char) == EXISTS) {
+			cout << "이미 존재하는 번호입니다!";
 			continue;
 		}
-		
-		if (bus_order > 999 || bus_order < 1) {
+
+		else if (bus_order > 999 || bus_order < 1) {
 			cout << "\n유효 범위 초과!\n";
 			continue;
 		}
@@ -91,9 +88,14 @@ void Bus::Install() {
 }
 
 
+
 void Bus::Reservate() {
 	int seat;
 	int bus_order;
+	static int temp_bus_order;
+	static string temp_s;
+	static const char* temp_num_char;
+
 	char userName[10];
 	char null[4] = " ";
 	
@@ -101,27 +103,28 @@ void Bus::Reservate() {
 		cout << "\n버스 번호: ";
 		cin >> bus_order;
 		string s = to_string(bus_order);
-		const char* num_char = s.c_str();
+		char const* num_char = s.c_str();
 
 		if (bus_order > 1000 || bus_order < 1)
 			cout << "유효 범위 초과!(* 1~999까지의 번호만 입력가능. *)";
-		else {
-			if (db.SelectData(dir, num_char) == bus_order) {
-				cerr << "자리있다.";
-				continue;
-			}
-			
-			/*if (strcmp(bus[bus_order].bus_no, num_char) != 0) {
-				cout << "일치하는 번호 없음!\n";
-			}
-			*/
-			else {
-				db.InsertTicketNum(dir, num_char);
-				break;
-			}
-				
+
+		/*if (strcmp(bus[bus_order].bus_no, num_char) != 0) {
+			cout << "선택하신 버스는 존재하지 않습니다!!\n";
 		}
-		
+		*/
+		if (db.CheckBusExists(dir, num_char) == NOT_EXISTS) {
+			cout << "선택하신 버스는 존재하지 않습니다!!\n";
+			continue;
+		}
+	
+			
+		else{
+			db.InsertTicketNum(dir, num_char);
+			temp_s = to_string(temp_bus_order);
+			temp_num_char = temp_s.c_str();
+			break;
+		}
+				
 	}
 
 	while (1) {
@@ -129,7 +132,7 @@ void Bus::Reservate() {
 		cin >> seat;
 		string sSeat = to_string(seat);
 		char const* cSeat = sSeat.c_str();
-
+	
 		if (seat > 32) {
 			cout << "지정된 좌석 수 보다 큽니다!\n";
 			continue;
@@ -138,17 +141,21 @@ void Bus::Reservate() {
 			cout << "이미 다른 이용객이 있습니다!\n";
 			continue;
 		}*/
-
-		db.CheckBusExists(dir, cSeat, seat);
-		if (sqlite3_table_column_metadata(DB, dir, tbl_bus, col_bus, 0, 0, 0, 0, 0) == seat) {
+		if (db.IsSeatNull(dir, cSeat, temp_num_char) == NOT_NULL) {
+			cout << "ok: " << temp_num_char << endl;
 			cout << "이미 다른 이용객이 있습니다!\n";
 			continue;
 		}
+
 		else {
 			string s = to_string(seat);
 			const char* num_char = s.c_str();
-			db.InsertTicketSeat(dir, num_char);
-			break;
+			if (num_char != NULL) {
+				db.InsertTicketSeat(dir, num_char);
+				break;
+			}
+			else
+				break;
 		}
 			
 	}
