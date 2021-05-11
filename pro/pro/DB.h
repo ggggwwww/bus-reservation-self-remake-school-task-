@@ -27,7 +27,7 @@ const char* col_bus = "NAME";
 const char* col_seat = "SEAT";
 
 int db_temp;
-
+static string strSeat;
 class db {
 public:
 
@@ -40,7 +40,8 @@ public:
 	static int InsertTicketNum(const char* dir, const char* bus);
 	static int Callback(void* NotUsed, int argc, char** argv, char** azColName);
 	static int CheckBusExists(const char* dir, const char* num);
-	static int IsSeatNull(const char* dir, const char* seat, const char* bus_num);
+	static int IsSeatNull(const char* dir, const char* seat);
+	static int SelectBus(const char* dir);
 }db;
 
 int db::CreateDB(const char* dir) {
@@ -89,7 +90,7 @@ int db::CreateTicketTable(const char* dir) {
 	string sql("CREATE TABLE IF NOT EXISTS SEATS"
 		"(NUMBER VARCHAR(50), "
 		"USER VARCHAR(50),"
-		"SEAT VARCHAR(50) PRIMARY KEY,"
+		"SEAT VARCHAR(50) ,"//PRIMARY KEY 있엇으나 제거
 		"FOREIGN KEY (NUMBER) REFERENCES BUS (NUMBER)"
 		");");
 
@@ -126,6 +127,8 @@ int db::InsertBUSData(const char* dir, const char* num, const char* name, const 
 		+ "'"+strfrom + "'"+"," + "'"+strto + "'"+");"
 	);
 
+	cout << "sql:" << sql << endl;
+
 	exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
 	if (exit != SQLITE_OK) {// db 연결
 		cerr << "Error! 버스" << endl;
@@ -136,6 +139,7 @@ int db::InsertBUSData(const char* dir, const char* num, const char* name, const 
 
 	return 0;
 }
+
 int db::InsertTicketNum(const char* dir, const char* bus_no) {
 	int exit = sqlite3_open(dir, &DB);
 	string strnum = bus_no;
@@ -153,6 +157,7 @@ int db::InsertTicketNum(const char* dir, const char* bus_no) {
 
 	return 0;
 }
+
 int db::InsertTicketSeat(const char* dir, const char* seat) {
 	int exit = sqlite3_open(dir, &DB);
 	string strseat = seat;
@@ -160,8 +165,8 @@ int db::InsertTicketSeat(const char* dir, const char* seat) {
 	//	"VALUES('" + strseat + "');"
 	//);
 	string sql("UPDATE SEATS SET SEAT = "
-		+ a + strseat + a +
-		" WHERE SEAT is NULL");
+		+strseat+
+		" WHERE SEAT IS NULL");
 	exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
 	if (exit != SQLITE_OK) {// db 연결
 		cerr << "Error! 시트" << endl;
@@ -179,7 +184,7 @@ int db::InsertTicketUser(const char* dir, const char* user) {
 	
 	string sql("UPDATE SEATS SET USER = "
 		+a+struser+a+
-		" WHERE USER is NULL");
+		" WHERE USER IS NULL");
 
 	exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
 
@@ -189,19 +194,17 @@ int db::InsertTicketUser(const char* dir, const char* user) {
 	}
 	else
 		cout << "Success! 유저 데이터" << endl;
-	sqlite3_close(DB);
 
 	return 0;
 }
 
 int db::Callback(void* NotUsed, int argc, char** argv, char** azColName) {
 	for (int i = 0; i < argc; i++) {
-		//cout << azColName[i] << ": " << argv[i] << endl;
+		cout << azColName[i] << ": " << argv[i] << endl;
 	}
 	cout << endl;
 	return 0;
 }
-
 
 int db::CheckBusExists(const char* dir, const char* num) {
 
@@ -212,19 +215,18 @@ int db::CheckBusExists(const char* dir, const char* num) {
 		);
 
 	//exit = sqlite3_exec(DB, sql.c_str(), Callback, 0, 0);
+	db_temp = 0;
 	exit = sqlite3_exec(DB, sql.c_str(), 
 		[](void* NotUsed, int argc, char** argv, char** azColName) -> int{//lambda(Callback Function.) 
 			db_temp = argc;
 			return 0;
 		}, 0, 0);
 
-	
-
-	if (exit != SQLITE_OK) return NOT_EXISTS;
-
-	if (db_temp == 0) return NOT_EXISTS;
+	//if (exit != SQLITE_OK) return NOT_EXISTS;
+	if (db_temp <= 0) return NOT_EXISTS;
 	else return EXISTS;
 	sqlite3_free(DB);
+
 	//if (exit == SQLITE_OK)
 	//	return -1;
 	//else if(exit != SQLITE_OK)
@@ -232,30 +234,43 @@ int db::CheckBusExists(const char* dir, const char* num) {
 
 }
 
-int db::IsSeatNull(const char* dir, const char* seat, const char* bus_num) {
+int db::IsSeatNull(const char* dir, const char* seat) {
 	int exit = sqlite3_open(dir, &DB);
-	string strSeat = seat;
-	string strBusNum = bus_num;
-	string sql = ("SELECT * FROM SEATS " 
-		"WHERE NUMBER IS "+a+strBusNum+a+" AND SEAT IS NULL");
+	strSeat = seat;
+	/*string strBusNum = bus_num;
+	int bus_order = atoi(bus_num);*/
+	string sql = ("SELECT SEAT FROM SEATS WHERE EXISTS (SELECT SEAT FROM SEATS WHERE SEAT IS "+strSeat+")");
+	db_temp = 0;
+
 	exit = sqlite3_exec(DB, sql.c_str(), [](void* NotUsed, int argc, char** argv, char** azColName)->int {
-		return -1;
+		for (int i = 0; i < argc; i++) {
+			//cout << azColName[i] << ": " << argv[i] << endl;
+			if (argv[i] == strSeat) {
+				cout << argv[i] << endl;
+				return NOT_NULL;
+			}
+			else {
+				//cout << argv[i] << endl;
+				continue;
+			}
+		}
+		cout << endl;
 		}, 0, 0);
-	
+
 	sqlite3_free(DB);
-	//if(db_temp == 0) return IS_NULL;
-	if (exit == SQLITE_OK) {
-		cout << sql;
-		return IS_NULL;
-	}
-	else{
-		
-		return NOT_NULL;
-		
-	};
 	
+	return exit;
 }
 
+int db::SelectBus(const char* dir) {
+	int exit = sqlite3_open(dir, &DB);
+
+	string sql = ("SELECT * FROM BUS");
+	exit = sqlite3_exec(DB, sql.c_str(), Callback, 0, 0);
+	cout << exit;
+	sqlite3_free(DB);
+	return 0;
+}
 
 
 

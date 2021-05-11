@@ -28,7 +28,6 @@
     <ClInclude Include="forbus.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\main.ui" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

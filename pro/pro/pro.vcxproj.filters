@@ -38,8 +38,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\main.ui">
-      <Filter>Source</Filter>
-    </None>
   </ItemGroup>
 </Project>

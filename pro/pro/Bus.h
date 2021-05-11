@@ -114,10 +114,8 @@ void Bus::Reservate() {
 		*/
 		if (db.CheckBusExists(dir, num_char) == NOT_EXISTS) {
 			cout << "선택하신 버스는 존재하지 않습니다!!\n";
-			continue;
+			break;
 		}
-	
-			
 		else{
 			db.InsertTicketNum(dir, num_char);
 			temp_s = to_string(temp_bus_order);
@@ -141,22 +139,18 @@ void Bus::Reservate() {
 			cout << "이미 다른 이용객이 있습니다!\n";
 			continue;
 		}*/
-		if (db.IsSeatNull(dir, cSeat, temp_num_char) == NOT_NULL) {
-			cout << "ok: " << temp_num_char << endl;
+		if (db.IsSeatNull(dir, cSeat) == NOT_NULL) {
 			cout << "이미 다른 이용객이 있습니다!\n";
 			continue;
 		}
-
-		else {
+		else if (db.IsSeatNull(dir, cSeat) == IS_NULL) {
 			string s = to_string(seat);
 			const char* num_char = s.c_str();
-			if (num_char != NULL) {
-				db.InsertTicketSeat(dir, num_char);
-				break;
-			}
-			else
-				break;
+			db.InsertTicketSeat(dir, num_char);
+			break;
+
 		}
+
 			
 	}
 
@@ -169,8 +163,7 @@ void Bus::Reservate() {
 			continue;
 		}
 		else {
-			strcpy(bus[bus_order].seat[seat].name, userName);
-			
+			//strcpy(bus[bus_order].seat[seat].name, userName);
 			db.InsertTicketUser(dir, userName);
 			break;
 		}
@@ -190,14 +183,19 @@ void Bus::ShowInform() {
 			cout << "유효 범위 초과!\n";
 			continue;
 		}
-		else if (strcmp(bus[bus_order].bus_no, num_char) != 0) {
+	/*	else if (strcmp(bus[bus_order].bus_no, num_char) != 0) {
 			cout << "해당 버스는 존재하지 않습니다!\n";
+			break;
+		}*/
+		else if (db.CheckBusExists(dir, num_char) == NOT_EXISTS) {
+			cout << "선택하신 버스는 존재하지 않습니다!!\n";
 			break;
 		}
 		else {
 			printf("\n버스 번호: %s 운전수: %s 출발시간: %s 도착시간: %s\n출발지: %s 도착지: %s\n",
 				bus[bus_order].bus_no, bus[bus_order].driver, bus[bus_order].departT,
 				bus[bus_order].arrivalT, bus[bus_order].from, bus[bus_order].to);
+			cout << db.SelectBus(dir);
 			for (int i = 1; i <= 32; i++) {
 				if (i == 32)
 					printf("%d. %s\n ", i, bus[bus_order].seat[i].name);

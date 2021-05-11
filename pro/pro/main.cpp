@@ -3,11 +3,12 @@
 #include <fstream>
 #include "forbus.h"
 #include "Bus.h"
+#include <filesystem>
 #include <sqlite3.h>
 
 using namespace std;
 
-const string path = "C:\DeleteMe\BUS.db";
+const string path = "C:\\DeleteMe\\Bus.db";
 int main() {
 	int i;
 	
@@ -27,7 +28,6 @@ int main() {
 	
 	
 	while (1) {
-		
 		cout << "\n1.버스 정보 기입\n2.예약\n3.정보 확인\n4.이용 가능한 버스\n5.종료\n\n";
 		cin >> i;
 		if (!cin)
@@ -53,5 +53,6 @@ int main() {
 		}
 
 	}
+
 	return 0;
 } 
