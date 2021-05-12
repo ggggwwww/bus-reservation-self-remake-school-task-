@@ -38,10 +38,12 @@ public:
 	static int InsertTicketSeat(const char* dir, const char* seat);
 	static int InsertTicketUser(const char* dir, const char* user);
 	static int InsertTicketNum(const char* dir, const char* bus);
-	static int Callback(void* NotUsed, int argc, char** argv, char** azColName);
 	static int CheckBusExists(const char* dir, const char* num);
 	static int IsSeatNull(const char* dir, const char* seat);
+	static int BusCallback(void* NotUsed, int argc, char** argv, char** azColName);
 	static int SelectBus(const char* dir);
+	static int SeatCallback(void* NotUsed, int argc, char** argv, char** azColName);
+	static int SelectSeat(const char* dir);
 }db;
 
 int db::CreateDB(const char* dir) {
@@ -198,13 +200,7 @@ int db::InsertTicketUser(const char* dir, const char* user) {
 	return 0;
 }
 
-int db::Callback(void* NotUsed, int argc, char** argv, char** azColName) {
-	for (int i = 0; i < argc; i++) {
-		cout << azColName[i] << ": " << argv[i] << endl;
-	}
-	cout << endl;
-	return 0;
-}
+
 
 int db::CheckBusExists(const char* dir, const char* num) {
 
@@ -226,11 +222,6 @@ int db::CheckBusExists(const char* dir, const char* num) {
 	if (db_temp <= 0) return NOT_EXISTS;
 	else return EXISTS;
 	sqlite3_free(DB);
-
-	//if (exit == SQLITE_OK)
-	//	return -1;
-	//else if(exit != SQLITE_OK)
-	//	return 1;
 
 }
 
@@ -262,15 +253,67 @@ int db::IsSeatNull(const char* dir, const char* seat) {
 	return exit;
 }
 
+
+int db::BusCallback(void* NotUsed, int argc, char** argv, char** azColName) {
+	string inform[] = {
+		"버스 번호",
+		"운전수",
+		"출발시간",
+		"도착시간",
+		"출발지",
+		"도착지"
+	};
+	for (int i = 0; i < argc; i++) {
+		cout << inform[i] << ": " << argv[i] << endl;
+	}
+	cout << endl;
+	return 0;
+}
+
 int db::SelectBus(const char* dir) {
 	int exit = sqlite3_open(dir, &DB);
 
 	string sql = ("SELECT * FROM BUS");
-	exit = sqlite3_exec(DB, sql.c_str(), Callback, 0, 0);
-	cout << exit;
+	exit = sqlite3_exec(DB, sql.c_str(), BusCallback, 0, 0);
 	sqlite3_free(DB);
 	return 0;
 }
+
+int db::SeatCallback(void* NotUsed, int argc, char** argv, char** azColName) {
+	static int cnt = 2;
+	for (int i = 0; i < argc; i++) {
+
+
+		if (argv[i] == NULL) {
+			cout << i << ". ";
+		}
+		else {
+			if (cnt % 2 == 0) {
+				cout << argv[i];
+			}
+			else {
+				cout << "." << argv[i] << endl;
+			}
+			cnt++;
+		}
+
+		
+	}
+	return 0;
+}
+
+int db::SelectSeat(const char* dir) {
+	int exit = sqlite3_open(dir, &DB);
+
+	/*string sql = ("SELECT USER FROM SEATS");
+	exit = sqlite3_exec(DB, sql.c_str(), SeatCallback, 0, 0);*/
+	string sql = ("SELECT SEAT, USER FROM SEATS");
+	exit = sqlite3_exec(DB, sql.c_str(), SeatCallback, 0, 0);
+
+	sqlite3_free(DB);
+	return 0;
+}
+
 
 
 
