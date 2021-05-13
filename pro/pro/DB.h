@@ -44,6 +44,7 @@ public:
 	static int SelectBus(const char* dir);
 	static int SeatCallback(void* NotUsed, int argc, char** argv, char** azColName);
 	static int SelectSeat(const char* dir);
+	static int CheckAvailability(const char* dir);
 }db;
 
 int db::CreateDB(const char* dir) {
@@ -200,8 +201,6 @@ int db::InsertTicketUser(const char* dir, const char* user) {
 	return 0;
 }
 
-
-
 int db::CheckBusExists(const char* dir, const char* num) {
 
 	int exit = sqlite3_open(dir, &DB);
@@ -253,7 +252,6 @@ int db::IsSeatNull(const char* dir, const char* seat) {
 	return exit;
 }
 
-
 int db::BusCallback(void* NotUsed, int argc, char** argv, char** azColName) {
 	string inform[] = {
 		"버스 번호",
@@ -282,22 +280,15 @@ int db::SelectBus(const char* dir) {
 int db::SeatCallback(void* NotUsed, int argc, char** argv, char** azColName) {
 	static int cnt = 2;
 	for (int i = 0; i < argc; i++) {
-
-
 		if (argv[i] == NULL) {
 			cout << i << ". ";
 		}
 		else {
-			if (cnt % 2 == 0) {
-				cout << argv[i];
-			}
-			else {
-				cout << "." << argv[i] << endl;
-			}
+			if (cnt % 2 == 0) cout << argv[i];		
+			else cout << "." << argv[i] << endl;
+			
 			cnt++;
 		}
-
-		
 	}
 	return 0;
 }
@@ -314,6 +305,23 @@ int db::SelectSeat(const char* dir) {
 	return 0;
 }
 
+int db::CheckAvailability(const char* dir) {
+	int exit = sqlite3_open(dir, &DB);
 
+	string sql = ("SELECT NUMBER FROM BUS");
+	exit = sqlite3_exec(DB, sql.c_str(), [](void* NotUsed, int argc, char** argv, char** azColName)->int {
+
+		if (argc <= 0) cout << "버스가 없습니다.";
+		else {
+			for (int i = 0; i < argc; i++) {
+				cout << argv[i] << "번 버스" << endl;
+			}
+			return 0;
+		}
+
+		}, 0, 0);
+	
+	return 0;
+}
 
 

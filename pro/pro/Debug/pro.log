@@ -4,5 +4,6 @@ C:\Users\user\source\repos\pro\pro\Bus.h(43,6): warning C4101: 'length' :참조�
 C:\Users\user\source\repos\pro\pro\main.cpp(19,31): warning C4805: '==': 연산에 'int' 형식과 'bool' 형식을 함께 사용하는 것은 안전하지 않습니다.
 C:\Users\user\source\repos\pro\pro\main.cpp(16,8): warning C4101: 'error' :참조되지 않은 지역 변수입니다.
 C:\Users\user\source\repos\pro\pro\main.cpp(15,9): warning C4101: 'result' :참조되지 않은 지역 변수입니다.
-C:\Users\user\source\repos\pro\pro\DB.h(249): warning C4715: '<lambda_046b9fa5d807d068f68011064ab28836>::operator()': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\user\source\repos\pro\pro\DB.h(248): warning C4715: '<lambda_046b9fa5d807d068f68011064ab28836>::operator()': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\user\source\repos\pro\pro\DB.h(322): warning C4715: '<lambda_92a26e403e26e5ff366975299d2e3883>::operator()': 모든 제어 경로에서 값을 반환하지는 않습니다.
   pro.vcxproj -> C:\Users\user\source\repos\pro\Debug\pro.exe

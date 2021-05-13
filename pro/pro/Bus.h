@@ -210,20 +210,21 @@ void Bus::ShowInform() {
 }
 
 void Bus::Available() {//기입된 번호들 출력
-	for (bus_order = 0; bus_order < 1000; bus_order++) {
-		string s = to_string(bus_order);
-		char const* num_char = s.c_str();
+	//for (bus_order = 0; bus_order < 1000; bus_order++) {
+	//	string s = to_string(bus_order);
+	//	char const* num_char = s.c_str();
 
-		if (strcmp(bus[bus_order].bus_no, num_char) != 0) {
-			continue;
-		}
-		else if (strcmp(bus[bus_order].bus_no, num_char) == 0) {
-			cout << bus[bus_order].bus_no << "번 ";
-		}
-		else {
-			cout << "어떤 버스도 없습니다!\n";
-			break;
-		}
+	//	if (strcmp(bus[bus_order].bus_no, num_char) != 0) {
+	//		continue;
+	//	}
+	//	else if (strcmp(bus[bus_order].bus_no, num_char) == 0) {
+	//		cout << bus[bus_order].bus_no << "번 ";
+	//	}
+	//	else {
+	//		cout << "어떤 버스도 없습니다!\n";
+	//		break;
+	//	}
 
-	}
+	//}
+	db.CheckAvailability(dir);
 }
